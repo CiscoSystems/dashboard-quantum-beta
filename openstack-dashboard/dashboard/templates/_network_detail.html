@@ -1,0 +1,28 @@
+<table id='Ports'>
+  <tr id='headings'>
+    <th>ID</th>
+    <th>Attached to</th>
+    <th>Actions</th>
+    <th>Extensions</th>
+  </tr>
+  <tbody class='main'>
+    {% foreach port in ports %}
+      <tr class="{% cycle 'odd' 'even' %}">
+          <td></td>
+          <td></td>
+          <td id="actions">
+            <ul>
+              <li>{% include "_delete.html" with form=delete_form %}</li>
+            </ul>
+          </td>
+          <td id="extensions">
+            <ul>
+              <li>QoS</li>
+              <li>SPAN</li>
+              <li>VLAN</li>
+            </ul>
+          </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

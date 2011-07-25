@@ -88,6 +88,7 @@ INSTALLED_APPS = (
     'django_nose',
     'django_openstack',
     'django_openstack.templatetags',
+    'django_quantum',
     'mailer',
 )
 

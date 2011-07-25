@@ -1,0 +1,26 @@
+<table id='networks'>
+  <tr id='headings'>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Ports</th>
+    <th>Available</th>
+    <th>Used</th>
+    <th>Action</th>
+  </tr>
+  <tbody class='main'>
+    {% for network in networks %}
+      <tr class="{% cycle 'odd' 'even' %}">
+          <td><a href='{% url dash_networks_detail request.user.tenant network.id %}'>{{network.id}}</a></td>
+          <td>{{network.name}}</td>
+          <td>{{network.ports}}</td>
+          <td>{{network.available}}</td>
+          <td>{{network.used}}</td>
+          <td id="actions">
+            <ul>
+              <li>{% include "_delete.html" with form=delete_form %}</li>
+            </ul>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

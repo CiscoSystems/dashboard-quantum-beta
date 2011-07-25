@@ -1,0 +1,13 @@
+README
+setup.py
+django_quantum/__init__.py
+django_quantum/api.py
+django_quantum/models.py
+django_quantum/tests.py
+django_quantum/testsettings.py
+django_quantum/urls.py
+django_quantum.egg-info/PKG-INFO
+django_quantum.egg-info/SOURCES.txt
+django_quantum.egg-info/dependency_links.txt
+django_quantum.egg-info/requires.txt
+django_quantum.egg-info/top_level.txt

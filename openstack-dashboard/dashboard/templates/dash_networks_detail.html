@@ -1,0 +1,28 @@
+{% extends 'dash_base.html' %}
+{# list of user's instances #}
+{# standard nav, sidebar, list of instances in main #}
+
+{% block sidebar %}
+  {% with current_sidebar="networks" %}
+    {{block.super}}
+  {% endwith %}
+{% endblock %}
+
+{% block main %}
+  <div id='page_header'>
+    <h2><span>Compute:Network</span> Network {{network.id}}</h2>
+    <p class='desc'><span>&mdash;</span> </p>
+  </div>
+
+  {% include "_messages.html" %}
+
+  {% if network %}
+  <div class='main_content'>
+      <div class='table_title wide'>
+        <h3>{{network.id}}</h3>
+      </div>
+      {% include '_network_detail.html' %}
+  </div>
+  {% endif %}
+
+{% endblock %}

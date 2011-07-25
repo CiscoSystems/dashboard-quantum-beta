@@ -1,0 +1,17 @@
+Metadata-Version: 1.0
+Name: django-quantum
+Version: 0.3
+Summary: A Django interface for Quantum.
+Home-page: https://launchpad.net/django-quantum/
+Author: Arvind Somya
+Author-email: asomya@cisco.com
+License: Apache 2.0
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Framework :: Django
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Internet :: WWW/HTTP
