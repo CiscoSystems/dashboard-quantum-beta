@@ -8,6 +8,10 @@
   {% endwith %}
 {% endblock %}
 
+{% block headercss %}
+    <link href='/media/dashboard/css/cupertino/jquery-ui-1.7.2.custom.css' media='screen' rel='stylesheet' />
+{% endblock %}
+
 {% block main %}
   <div id='page_header'>
     <h2><span>Compute:</span> Networks</h2>
@@ -16,6 +20,13 @@
 
   {% include "_messages.html" %}
 
+   <div class="dash_block wide form">
+    <div class='title_block'>
+      <h3>Create Network</h3>
+    </div> 
+   {% include '_network_form.html' with form=network_form %}
+   </div>
+   
   {% if networks %}
     <div class='main_content'>
       <div class='table_title wide'>
@@ -33,10 +44,10 @@
     {% else %}
         <div class="status_box info">
           <h2>Info</h2>
-          <p>There are currently no networks.  You can create a network using the form below </p>
+          <p>There are currently no networks.  You can create a network using the form above </p>
         </div>
     {% endif %}
+   </div>
   </div>
-</div>
-
+  
 {% endblock %}

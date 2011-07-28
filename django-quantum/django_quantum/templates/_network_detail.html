@@ -1,0 +1,41 @@
+{% if network.ports %}
+<table id='Ports'>
+  <tr id='headings'>
+    <th>ID</th>
+    <th>State</th>
+    <th>Attachment</th>
+    <th>Actions</th>
+    <th>Extensions</th>
+  </tr>
+  <tbody class='main'>
+    {% for port in network.ports %}
+      <tr class="{% cycle 'odd' 'even' %}">
+          <td>{{port.id}}</td>
+          <td class="{{port.state}}">{{port.state}}</td>
+          <td>{{port.attachment}}</td>
+          <td id="actions">
+            <ul>
+              <li>{% include "_delete_port.html" with form=delete_port_form %}</li>
+              <li>{% include "_attach_port.html" with form=attach_port_form %}</li>
+              {% if port.attachment == None %}
+              <li>Detach</li>
+              {% else %}
+              <li>{% include "_detach_port.html" with form=detach_port_form %}</li>
+              {% endif %}
+            </ul>
+          </td>
+          <td id="extensions">
+            <ul>
+              <li>QoS</li>
+            </ul>
+          </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="status_box info">
+    <h2>Info</h2>
+    <p>There are currently no ports in this network.  You can create a ports using the form above </p>
+</div>
+{% endif %}

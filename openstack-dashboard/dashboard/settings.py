@@ -74,6 +74,7 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_DIRS = (
     os.path.join(ROOT_PATH, 'templates'),
+    '../django-quantum/django_quantum/templates'
 )
 
 INSTALLED_APPS = (

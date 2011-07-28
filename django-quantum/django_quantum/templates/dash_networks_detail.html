@@ -10,16 +10,23 @@
 
 {% block main %}
   <div id='page_header'>
-    <h2><span>Compute:Network</span> Network {{network.id}}</h2>
+    <h2><span>Compute:Network</span> {{network.id}}</h2>
     <p class='desc'><span>&mdash;</span> </p>
   </div>
 
   {% include "_messages.html" %}
-
+  
   {% if network %}
+  <div class="dash_block wide form">
+    <div class='title_block'>
+      <h3>Create Ports</h3>
+    </div> 
+   {% include '_create_port.html' with form=create_port_form %}
+  </div>
+
   <div class='main_content'>
       <div class='table_title wide'>
-        <h3>{{network.id}}</h3>
+        <h3>Ports</i></h3>
       </div>
       {% include '_network_detail.html' %}
   </div>

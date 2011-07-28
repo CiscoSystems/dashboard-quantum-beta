@@ -1627,3 +1627,15 @@ li.title h4{
     margin-left: 5px;
 }
 
+table#Ports td.UP {
+    color:green;
+}
+
+table#Ports td.DOWN {
+    color:red;
+}
+
+.network_rename_div {
+    background-color: #FFFFFF;
+    padding:10px;
+}
