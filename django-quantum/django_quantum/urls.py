@@ -24,3 +24,7 @@ from django.conf import settings
 urlpatterns = patterns('',
     url(r'^dash/', include('django_quantum.dash.urls'))
 )
+
+urlpatterns += patterns('',
+    url(r'^ajax/virtual_interfaces/$', 'django_quantum.dash.views.networks.vif_ids')
+)

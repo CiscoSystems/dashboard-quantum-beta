@@ -1627,7 +1627,7 @@ li.title h4{
     margin-left: 5px;
 }
 
-table#Ports td.UP {
+table#Ports td.ACTIVE {
     color:green;
 }
 
@@ -1637,5 +1637,34 @@ table#Ports td.DOWN {
 
 .network_rename_div {
     background-color: #FFFFFF;
-    padding:10px;
+    padding: 10px;
+}
+
+.vif-list {
+  font: 12px/21px arial,sans-serif;
+  font-style: italic;
+}
+
+table.attachment_table {
+    margin-top: 10px;
+    border: none;
+    display: none;
+}
+
+table.attachment_table td {
+    padding: 5px;
+    font-size: 8pt;
+}
+
+table.attachment_table td.row_head {
+    font-weight: bold;
+}
+
+table.attachment_table td.row_val {
+    font-style: italic;
+}
+
+div.error_block {
+    padding: 5px;
+    font-size: 8pt;
 }

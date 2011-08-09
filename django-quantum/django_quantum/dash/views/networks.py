@@ -29,12 +29,18 @@ from django import template
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
 from django_quantum import forms
 
+from django_openstack import api
+
 from quantum.client import Client
+
 import warnings
+
+
 LOG = logging.getLogger('django_quantum.dash')
 
 quantum = Client(settings.QUANTUM_URL, settings.QUANTUM_PORT, False, settings.QUANTUM_TENANT, 'json')
@@ -47,7 +53,7 @@ class CreateNetwork(forms.SelfHandlingForm):
 
         try:
             LOG.info('Creating network %s ' % network_name)
-            send_data = {'network': {'network-name': '%s' % network_name}}
+            send_data = {'network': {'net-name': '%s' % network_name}}
             quantum.create_network(send_data)
         except Exception, e:
             messages.error(request,
@@ -87,7 +93,7 @@ class RenameNetwork(forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             LOG.info('Renaming network %s to %s' % (data['network'], data['new_name']))
-            send_data = {'network': {'network-name': '%s' % data['new_name']}}
+            send_data = {'network': {'net-name': '%s' % data['new_name']}}
             quantum.update_network(data['network'], send_data)
         except Exception, e:
             messages.error(request,
@@ -148,6 +154,8 @@ class AttachPort(forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             LOG.info('Attaching %s port to VIF %s' % (data['port'], data['vif']))
+            body = {'port': {'attachment-id': '%s' % data['vif']}}
+            quantum.attach_resource(data['network'], data['port'], body)
         except Exception, e:
             messages.error(request,
                            'Unable to attach port %s to VIF %s: %s' %
@@ -166,6 +174,7 @@ class DetachPort(forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             LOG.info('Detaching port %s' % data['port'])
+            quantum.detach_resource(data['network'], data['port'])
         except Exception, e:
             messages.error(request,
                            'Unable to detach port %s: %s' %
@@ -176,6 +185,26 @@ class DetachPort(forms.SelfHandlingForm):
             messages.success(request, msg)
         return shortcuts.redirect(request.build_absolute_uri())
         
+    
+class TogglePort(forms.SelfHandlingForm):
+    network = forms.CharField(widget=forms.HiddenInput())
+    port = forms.CharField(widget=forms.HiddenInput())
+    state = forms.CharField(widget=forms.HiddenInput())
+    
+    def handle(self, request, data):
+        try:
+            LOG.info('Toggling port state to %s' % data['state'])
+            body = {'port': {'port-state': '%s' % data['state']}}
+            quantum.set_port_state(data['network'], data['port'], body)
+        except Exception, e:
+            messages.error(request,
+                           'Unable to set port state to %s: %s' %
+                           (data['state'], e.message,))
+        else:
+            msg = 'Port %s state set to %s.' % (data['port'],data['state'])
+            LOG.info(msg)
+            messages.success(request, msg)
+        return shortcuts.redirect(request.build_absolute_uri())
         
 @login_required
 def index(request, tenant_id):
@@ -184,11 +213,13 @@ def index(request, tenant_id):
     rename_form, rename_handled = RenameNetwork.maybe_handle(request)
     
     networks = []
+    instances = []
     
     try:
         networks_list = quantum.list_networks()
         details = []
         for network in networks_list['networks']:
+            
             # Get all ports statistics for the network
             total = 0
             available = 0
@@ -198,19 +229,22 @@ def index(request, tenant_id):
                 total += 1
                 # Get port details
                 port_details = quantum.list_port_details(network['id'], port['id'])
-                if port_details['ports']['port']['attachment'] == None:
+                # Get port attachment
+                port_attachment = quantum.list_port_attachments(network['id'], port['id'])
+                if port_attachment['attachment'] == None:
                     available += 1
                 else:
                     used += 1
             # Get network details like name and id
             details = quantum.list_network_details(network['id'])
             networks.append({
-                'name' : details['networks']['network']['name'], 
+                'name' : details['network']['name'], 
                 'id' : network['id'],
                 'total' : total,
                 'available' : available,
                 'used' : used
             })
+    
     except Exception, e:
         messages.error(request, 'Unable to get network list: %s' % e.message)
 
@@ -218,34 +252,38 @@ def index(request, tenant_id):
         'networks': networks,
         'network_form' : network_form,
         'delete_form' : delete_form,
-        'rename_form' : rename_form
+        'rename_form' : rename_form,
     }, context_instance=template.RequestContext(request))
 
 
 @login_required
 def detail(request, tenant_id, network_id):
-    create_port_form, create_handled = CreatePort.maybe_handle(request)
-    delete_port_form, delete_handled = DeletePort.maybe_handle(request)
-    attach_port_form, attach_handled = AttachPort.maybe_handle(request)
-    detach_port_form, detach_handled = DetachPort.maybe_handle(request)
+    create_port_form, create_handled  = CreatePort.maybe_handle(request)
+    delete_port_form, delete_handled  = DeletePort.maybe_handle(request)
+    attach_port_form, attach_handled  = AttachPort.maybe_handle(request)
+    detach_port_form, detach_handled  = DetachPort.maybe_handle(request)
+    toggle_port_form, port_toggle_handled = TogglePort.maybe_handle(request)
     
     network = {}
     network_ports = []
     
     try:
         network_details = quantum.list_network_details(network_id)
-        network['name'] = network_details['networks']['network']['name']
+        network['name'] = network_details['network']['name']
         network['id'] = network_id
         # Get all ports on this network
         ports = quantum.list_ports(network_id)
         for port in ports['ports']:
             port_details = quantum.list_port_details(network_id, port['id'])
+            # Get port attachments
+            port_attachment = quantum.list_port_attachments(network_id, port['id'])
             network_ports.append({
-                'id' : port_details['ports']['port']['id'],
-                'state' : port_details['ports']['port']['state'],
-                'attachment' : port_details['ports']['port']['attachment']
+                'id' : port_details['port']['id'],
+                'state' : port_details['port']['state'],
+                'attachment' : port_attachment['attachment']
             })
         network['ports'] = network_ports
+        
     except Exception, e:
         messages.error(request, 'Unable to get network details: %s' % e.message)
 
@@ -255,4 +293,51 @@ def detail(request, tenant_id, network_id):
         'delete_port_form' : delete_port_form,
         'attach_port_form' : attach_port_form,
         'detach_port_form' : detach_port_form,
+        'toggle_port_form' : toggle_port_form
     }, context_instance=template.RequestContext(request))
+
+
+@login_required
+def vif_ids(request):
+    vifs = []
+    attached_vifs = []
+    
+    try:
+        # Get a list of all networks
+        networks_list = quantum.list_networks()
+        for network in networks_list['networks']:
+            ports = quantum.list_ports(network['id'])
+            # Get port attachments
+            for port in ports['ports']:
+                port_attachment = quantum.list_port_attachments(network['id'], port['id'])
+                if port_attachment['attachment']:
+                    attached_vifs.append(port_attachment['attachment'].encode('ascii'))
+            # Get all instances
+            instances = api.server_list(request)
+            # Get virtual interface ids by instance
+            for instance in instances:
+                instance_vifs = instance.virtual_interfaces
+                for vif in instance_vifs:
+                    # Check if this VIF is already connected to any port
+                    if str(vif['id']) in attached_vifs:
+                        vifs.append({
+                            'id' : vif['id'],
+                            'instance' : instance.id,
+                            'instance_name' : instance.name,
+                            'available' : False,
+                            'network_id' : vif['network']['id'],
+                            'network_name' : vif['network']['label']
+                        })
+                    else:
+                        vifs.append({
+                            'id' : vif['id'],
+                            'instance' : instance.id,
+                            'instance_name' : instance.name,
+                            'available' : True,
+                            'network_id' : vif['network']['id'],
+                            'network_name' : vif['network']['label']
+                        })
+        return http.HttpResponse(simplejson.dumps(vifs), mimetype='application/json')
+    except Exception, e:
+        messages.error(request, 'Unable to get virtual interfaces: %s' % e.message)
+        return http.HttpResponse('Unable to get virtual interfaces: %s' % e.message, mimetype='application/json')

@@ -8,9 +8,13 @@
   {% endwith %}
 {% endblock %}
 
+{% block headercss %}
+    <link href='/media/dashboard/css/cupertino/jquery-ui-1.7.2.custom.css' media='screen' rel='stylesheet' />
+{% endblock %}
+
 {% block main %}
   <div id='page_header'>
-    <h2><span>Compute:Network</span> {{network.id}}</h2>
+    <h2><span>Compute:Network</span> {{network.name}}</h2>
     <p class='desc'><span>&mdash;</span> </p>
   </div>
 

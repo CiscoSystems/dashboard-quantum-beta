@@ -34,10 +34,11 @@ MAILER_EMAIL_BACKEND = EMAIL_BACKEND
 OPENSTACK_ADMIN_TOKEN = "999888777666"
 OPENSTACK_KEYSTONE_URL = "http://localhost:5000/v2.0/"
 
-# Quantum settings
+# Configure quantum connection details for networking
 QUANTUM_URL = '127.0.0.1'
 QUANTUM_PORT = '9696'
 QUANTUM_TENANT = '1234'
+QUANTUM_CLIENT_VERSION='0.1'
 
 # NOTE(tres): Replace all of this nonsense once Swift+Keystone
 # is stable.

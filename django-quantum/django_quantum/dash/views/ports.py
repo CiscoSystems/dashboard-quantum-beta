@@ -38,6 +38,8 @@ from quantum.client import Client
 
 LOG = logging.getLogger('django_quantum.dash')
 
+# This class is stub, in case we want to expand port capabilities 
+# later on.
 
 class CreatePort(forms.SelfHandlingForm):
     pass

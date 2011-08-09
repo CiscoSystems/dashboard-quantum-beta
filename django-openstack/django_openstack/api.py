@@ -160,7 +160,7 @@ class Server(APIResourceWrapper):
     """
     _attrs = ['addresses', 'attrs', 'hostId', 'id', 'imageRef', 'links',
              'metadata', 'name', 'private_ip', 'public_ip', 'status', 'uuid',
-             'image_name']
+             'image_name', 'virtual_interfaces']
 
     def __init__(self, apiresource, request):
         super(Server, self).__init__(apiresource)
@@ -220,7 +220,7 @@ class User(APIResourceWrapper):
     """Simple wrapper around openstackx.extras.users.User"""
     _attrs = ['email', 'enabled', 'id', 'tenantId']
 
-
+    
 def url_for(request, service_name, admin=False):
     catalog = request.session['serviceCatalog']
     if admin:
@@ -383,6 +383,8 @@ def server_delete(request, instance):
 
 
 def server_get(request, instance_id):
+    response = compute_api(request).servers.get(instance_id), request
+    LOG.info(response)
     return Server(compute_api(request).servers.get(instance_id), request)
 
 
@@ -465,6 +467,7 @@ def token_info(request, token):
     data = json.loads(response.read())
 
     admin = False
+    LOG.info(data)
     for role in data['auth']['user']['roleRefs']:
         if role['roleId'] == 'Admin':
             admin = True
