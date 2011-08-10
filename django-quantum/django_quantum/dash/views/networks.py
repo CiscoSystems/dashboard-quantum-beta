@@ -242,7 +242,8 @@ def index(request, tenant_id):
                 'id' : network['id'],
                 'total' : total,
                 'available' : available,
-                'used' : used
+                'used' : used,
+                'tenant' : tenant_id
             })
     
     except Exception, e:
@@ -277,10 +278,21 @@ def detail(request, tenant_id, network_id):
             port_details = quantum.list_port_details(network_id, port['id'])
             # Get port attachments
             port_attachment = quantum.list_port_attachments(network_id, port['id'])
+            # Find instance the attachment belongs to
+            # Get all instances
+            instances = api.server_list(request)
+            connected_instance = None
+            # Get virtual interface ids by instance
+            for instance in instances:
+                for vif in instance.virtual_interfaces:
+                    if str(vif['id']) == str(port_attachment):
+                        connected_instance = instance
+                        break
             network_ports.append({
                 'id' : port_details['port']['id'],
                 'state' : port_details['port']['state'],
-                'attachment' : port_attachment['attachment']
+                'attachment' : port_attachment['attachment'],
+                'instance' : instance
             })
         network['ports'] = network_ports
         
@@ -289,6 +301,7 @@ def detail(request, tenant_id, network_id):
 
     return shortcuts.render_to_response('dash_networks_detail.html', {
         'network': network,
+        'tenant' : tenant_id,
         'create_port_form' : create_port_form,
         'delete_port_form' : delete_port_form,
         'attach_port_form' : attach_port_form,

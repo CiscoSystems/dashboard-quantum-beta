@@ -18,7 +18,10 @@
       {% block topbar %}
         {% include '_topbar.html' %}
       {% endblock %}
-
+      <div id="breadcrumbs">
+          {% block breadcrumbs %}
+          {% endblock %}
+        </div>
       {% block content %}
       <div id="content">
         {% block sidebar %}

@@ -12,7 +12,18 @@
       <tr class="{% cycle 'odd' 'even' %}">
           <td>{{port.id}}</td>
           <td class="{{port.state}}">{{port.state}}</td>
-          <td>{{port.attachment}}</td>
+          <td>
+            {% if port.attachment == None %}
+            <ul>
+            <li>--</li>
+            </ul>
+            {% else %}
+            <ul>
+            <li><span class="attachment_value">{{port.instance.name}}</span></li>
+            <li>VIF id:<span class="attachment_value">{{port.attachment}}</span></li>
+            </ul>
+            {% endif %}
+          </td>
           <td id="actions">
             <ul>
               {% if port.attachment == None %}
